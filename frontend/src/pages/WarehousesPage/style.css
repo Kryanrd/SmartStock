@@ -1,0 +1,64 @@
+.page-container {
+  padding-top: 5rem;
+  background-color: #faf8f8;
+}
+
+.header {
+  text-align: center;
+}
+
+.warehouse-table {
+  width: 1200px;
+  border-collapse: collapse;
+  margin: 0 auto;
+}
+
+.warehouse-table th {
+  background: #94E2FF;
+  padding: 12px;
+  text-align: left;
+}
+
+.warehouse-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.warehouse-table tr:hover td {
+  background: #f4faff;
+}
+
+.action-button {
+  display: inline-block;
+  padding: 8px 16px;
+  margin: 0 4px;
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.search-button {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  box-shadow: 0 3px 8px rgba(76,175,80,0.3);
+  color: white;
+}
+
+.search-button:hover {
+  background: #45a049;
+}
+
+.analyze-button {
+  background: linear-gradient(135deg, #af4e4c, #924140);
+  box-shadow: 0 3px 8px rgba(175,78,76,0.3);
+  color: white;
+}
+
+.analyze-button:hover {
+  background: #924140;
+}
+
+.action-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
