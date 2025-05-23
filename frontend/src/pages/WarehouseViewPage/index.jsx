@@ -18,6 +18,7 @@ const ModelContainer = styled.div`
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     height: 70vh;
     min-height: 500px;
+    position: relative;
   `;
 
 const SearchContainer = styled.div`
@@ -98,6 +99,27 @@ const Actions = styled.div`
   }
 `;
 
+const ListeningOverlay = styled.div`
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(74, 74, 74, 0.7);
+  border-radius: 50%;
+  width: 80px; height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 1s infinite;
+
+  svg { color: #fff; width: 60px; height: 60px; }
+
+  @keyframes pulse {
+    0%   { transform: translate(-50%, -50%) scale(1);   opacity: 0.6; }
+    50%  { transform: translate(-50%, -50%) scale(1.2); opacity: 1;   }
+    100% { transform: translate(-50%, -50%) scale(1);   opacity: 0.6; }
+  }
+`;
+
 const WarehouseViewPage = () => {
   const { state } = useLocation();
   const warehouseName = state?.warehouseName || '— без имени —';
@@ -114,18 +136,53 @@ const WarehouseViewPage = () => {
   const [productsList, setProductsList] = useState([]);
   const [successMsg, setSuccessMsg] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [recognition, setRecognition] = useState(null);
+  const [isListening, setIsListening] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
-  const handleSearch = async () => {
+  const handleSearch = async (term) => {
+    const q = term.trim();
+    if (!q) {
+      // если пусто — ничего не подсвечиваем
+      setHighlightedProducts([]);
+      setNotFound(false);
+      return;
+    }
     try {
       const response = await axios.get(`http://localhost:3001/api/products/search`, {
-        params: { query: searchQuery, warehouseId: id }
+        params: { query: q, warehouseId: id }
       });
       const productIds = response.data.map(p => Number(p.id));
       setHighlightedProducts(productIds);
+      setNotFound(productIds.length === 0);
     } catch (error) {
       console.error("Ошибка поиска:", error);
+      setNotFound(true);
     }
   };
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recog = new SpeechRecognition();
+      recog.lang = 'ru-RU';
+      recog.interimResults = false;
+      recog.maxAlternatives = 1;
+      recog.onstart = () => setIsListening(true);
+      recog.onend = () => setIsListening(false);
+      setRecognition(recog);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!recognition) return;
+    recognition.onresult = e => {
+      const spoken = e.results[0][0].transcript;
+      setSearchQuery(spoken);
+      handleSearch(spoken);
+    };
+    recognition.onerror = console.error;
+  }, [recognition]);
 
   useEffect(() => {
     axios.get(`http://localhost:3001/api/warehouses/${id}/racks`)
@@ -161,7 +218,7 @@ const WarehouseViewPage = () => {
         shelf_id: selectedShelf,
         warehouse_id: id,
       });
-      
+
       setShowAddModal(false);
       // Формируем текст успеха
       const [rackId, shelfLevel] = findRackAndLevelByShelfId(Number(selectedShelf));
@@ -229,11 +286,17 @@ const WarehouseViewPage = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
 
-        <IconButton onClick={handleSearch}>
+
+        <IconButton onClick={() => handleSearch(searchQuery)}>
           <FiSearch size={20} />
         </IconButton>
 
-        <IconButton>
+        <IconButton
+          onClick={() => {
+            if (recognition) recognition.start();
+            else alert('Голосовой ввод не поддерживается');
+          }}
+        >
           <FiMic size={20} />
         </IconButton>
 
@@ -241,12 +304,28 @@ const WarehouseViewPage = () => {
           <FiPlus size={20} />
         </IconButton>
       </SearchContainer>
+      {notFound && (
+        <div style={{
+          color: '#b00',
+          background: '#ffe6e6',
+          padding: '0.5rem 1rem',
+          borderRadius: '4px',
+          marginBottom: '1rem'
+        }}>
+          Товар не найден
+        </div>
+      )}
 
       <ModelContainer>
         <Warehouse3DScene
           config={{ ...mockWarehouses[id], id }}
           highlightedProducts={highlightedProducts}
         />
+        {isListening && (
+          <ListeningOverlay>
+            <FiMic size={48} />
+          </ListeningOverlay>
+        )}
       </ModelContainer>
       {showAddModal && (
         <Overlay>

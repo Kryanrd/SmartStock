@@ -42,7 +42,6 @@ const WarehouseScene = ({ config, highlightedProducts = [] }) => {
           key={shelf.id}
           args={[rack.width, 0.2, rack.depth]}
           position={[0, shelf.pos_y, 0]}
-          castShadow receiveShadow
         >
           <meshPhysicalMaterial
             roughness={0.6}
@@ -55,14 +54,14 @@ const WarehouseScene = ({ config, highlightedProducts = [] }) => {
         </Box>
       ))}
       {/* Боковые стенки */}
-      <Box args={[0.2, rack.height, rack.depth]} position={[rack.width / 2, rack.height / 2, 0]} castShadow>
+      <Box args={[0.2, rack.height, rack.depth]} position={[rack.width / 2, rack.height / 2, 0]} >
         <meshPhysicalMaterial
           roughness={0.4}
           metalness={0.8}
           color="#888"
         />
       </Box>
-      <Box args={[0.2, rack.height, rack.depth]} position={[-rack.width / 2, rack.height / 2, 0]} castShadow>
+      <Box args={[0.2, rack.height, rack.depth]} position={[-rack.width / 2, rack.height / 2, 0]} >
         <meshPhysicalMaterial
           roughness={0.4}
           metalness={0.8}
@@ -81,7 +80,7 @@ const WarehouseScene = ({ config, highlightedProducts = [] }) => {
     const isHighlighted = highlightedProducts.includes(p.id);
 
     return (
-      <Box key={p.id} args={[p.width, p.height, p.depth]} position={[x, y, z]} castShadow receiveShadow>
+      <Box key={p.id} args={[p.width, p.height, p.depth]} position={[x, y, z]} >
         <meshPhysicalMaterial
           color={isHighlighted ? '#ff4d4d' : p.color}
           roughness={0.3}
