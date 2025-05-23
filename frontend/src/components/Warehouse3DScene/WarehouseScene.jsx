@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import {
   OrbitControls,
   Box,
-  SoftShadows,
-  MeshReflectorMaterial,
-  useTexture
+  SoftShadows
 } from '@react-three/drei';
 import { useLoader } from '@react-three/fiber';
 import { TextureLoader, RepeatWrapping } from 'three';
@@ -18,25 +16,13 @@ const WarehouseScene = ({ config, highlightedProducts = [] }) => {
     TextureLoader,
     '/textures/Concrete013_2K-JPG_Color.jpg'
   );
+  const shelfTexture = useLoader(
+    TextureLoader,
+    '/textures/Wood092_2K-JPG_Color.jpg'
+  );
 
   floorTexture.wrapS = floorTexture.wrapT = RepeatWrapping;
   floorTexture.repeat.set(10, 10);
-
-  // // Загрузка стеллажей + полок
-  // useEffect(() => {
-  //   if (!config?.id) return;
-  //   axios.get(`http://localhost:3001/api/warehouses/${config.id}/racks`)
-  //     .then(({ data }) => setRacks(data))
-  //     .catch(console.error);
-  // }, [config.id]);
-
-  // // Загрузка товаров
-  // useEffect(() => {
-  //   if (!config?.id) return;
-  //   axios.get(`http://localhost:3001/api/warehouses/${config.id}/products`)
-  //     .then(({ data }) => setProducts(data))
-  //     .catch(console.error);
-  // }, [config.id]);
 
   useEffect(() => {
     if (!config?.id) return;
@@ -64,6 +50,7 @@ const WarehouseScene = ({ config, highlightedProducts = [] }) => {
             clearcoat={1}
             clearcoatRoughness={0.1}
             color="#ddd"
+            map={shelfTexture}
           />
         </Box>
       ))}
@@ -88,9 +75,9 @@ const WarehouseScene = ({ config, highlightedProducts = [] }) => {
   // Рендерим одну коробку-товар
   const ProductBox = ({ p }) => {
     // рассчитываем глобальные координаты
-    const x = p.rack_x + p.offset_x;
+    const x = p.rack_x;
     const y = p.shelf_y + (p.offset_y || 0) + p.height / 2;
-    const z = p.rack_z + p.offset_z;
+    const z = p.rack_z;
     const isHighlighted = highlightedProducts.includes(p.id);
 
     return (

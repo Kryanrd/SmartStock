@@ -112,6 +112,8 @@ const WarehouseViewPage = () => {
   const [selectedShelf, setSelectedShelf] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
   const [productsList, setProductsList] = useState([]);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleSearch = async () => {
     try {
@@ -135,9 +137,21 @@ const WarehouseViewPage = () => {
   }, [id, refreshKey]);
 
 
+  const findRackAndLevelByShelfId = sid => {
+    for (let rack of racks) {
+      const shelf = rack.shelves.find(s => s.id === sid);
+      if (shelf) {
+        // предположим, rack.row_index и rack.col_index есть
+        const rackLabel = `${rack.row_index}–${rack.col_index}`;
+        return [rackLabel, shelf.level];
+      }
+    }
+    return ["?", "?"];
+  };
+
   // Добавление товара
   const handleAddProduct = async () => {
-    if (!newName || !selectedShelf) {
+    if (!newName.trim() || !selectedShelf) {
       return alert("Заполните название и выберите полку");
     }
     try {
@@ -147,12 +161,19 @@ const WarehouseViewPage = () => {
         shelf_id: selectedShelf,
         warehouse_id: id,
       });
-      // сброс формы
+      
+      setShowAddModal(false);
+      // Формируем текст успеха
+      const [rackId, shelfLevel] = findRackAndLevelByShelfId(Number(selectedShelf));
+      setSuccessMsg(`Товар успешно добавлен на стеллаж ${rackId}, полка ${shelfLevel}`);
+      setShowSuccess(true);
+
+      // Сбросим поля (но не закроем сразу модал, чтобы пользователь увидел сообщение)
       setNewName('');
       setNewDesc('');
       setSelectedShelf('');
-      setShowAddModal(false);
-      // обновляем сцену и данные
+
+      // Обновляем данные сцены
       setRefreshKey(k => k + 1);
     } catch (err) {
       console.error(err);
@@ -262,6 +283,17 @@ const WarehouseViewPage = () => {
               >
                 Добавить
               </button>
+            </Actions>
+          </Modal>
+        </Overlay>
+      )}
+      {showSuccess && (
+        <Overlay onClick={() => setShowSuccess(false)}>
+          <Modal>
+            <h2>Успешно!</h2>
+            <p>{successMsg}</p>
+            <Actions>
+              <button onClick={() => setShowSuccess(false)}>OK</button>
             </Actions>
           </Modal>
         </Overlay>

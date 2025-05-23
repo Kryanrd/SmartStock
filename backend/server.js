@@ -92,7 +92,7 @@ app.get("/api/warehouses/:id/racks", async (req, res) => {
     rows.forEach(r => {
       if (!racksMap[r.id]) {
         racksMap[r.id] = {
-          id: r.id, pos: [r.pos_x, r.pos_y, r.pos_z],
+          id: r.id, pos: [r.pos_x, 0, r.pos_z],
           width: r.width, height: r.height, depth: r.depth,
           shelves: [], row_index: r.row_index, col_index: r.col_index,
         };
