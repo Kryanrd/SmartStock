@@ -36,6 +36,7 @@ const WarehousesPage = () => {
               <td>
                 <Link
                   to={`/warehouse/${warehouse.id}/view`}
+                  state={{warehouseName:warehouse.name}}
                   className="action-button search-button"
                 >
                   Поиск
